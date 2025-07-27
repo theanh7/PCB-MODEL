@@ -1,0 +1,178 @@
+# PCB Defect Detection - .gitignore
+
+# =============================================================================
+# ESSENTIAL FILES TO KEEP (NOT IGNORED)
+# =============================================================================
+# Core Production Files:
+# - model.py
+# - enhanced_dataset.py  
+# - train.py
+# - evaluate.py
+# - inference.py
+# - test_enhanced_training.py
+# 
+# Documentation:
+# - README.md
+# - requirements.txt
+# - TECHNICAL_ANALYSIS.md
+# - .gitignore
+
+# =============================================================================
+# IGNORED FILES & DIRECTORIES
+# =============================================================================
+
+# Training Outputs & Models
+outputs/
+outputs_cpu/
+checkpoints/
+logs/
+*.pth
+*.pt
+*.ckpt
+best_model.pth
+checkpoint_*.pth
+
+# Dataset (Large files - should be downloaded separately)
+pcb-defect-dataset/
+data/
+dataset/
+*.jpg
+*.jpeg
+*.png
+*.bmp
+*.tiff
+
+# Training Logs & Curves
+*.log
+training_curves.png
+cpu_training_curves.png
+*.tensorboard
+
+# Python Cache & Compiled
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+.env
+.conda/
+
+# IDE & Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Jupyter Notebooks (except main ones)
+.ipynb_checkpoints/
+*-checkpoint.ipynb
+
+# Deprecated/Legacy Files
+dataset.py                    # OLD - uses albumentations
+simple_dataset.py            # OLD - basic transforms only
+train_cpu_debug.py           # DEBUG - not for production
+evaluate_cpu_model.py        # DEBUG - basic evaluation
+debug_single_cell.py         # DEBUG - testing script
+pcb_defect_detection_kaggle*.ipynb  # OLD - Kaggle versions
+
+# Legacy Documentation
+CLAUDE.md
+MIGRATION_GUIDE.md
+model_enhancement_analysis.md
+input_format_guide.md
+benchmark.py
+inference_legacy.py
+
+# Temporary Files
+*.tmp
+*.temp
+temp/
+tmp/
+
+# System Files
+.DS_Store
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# Coverage & Testing
+.coverage
+.pytest_cache/
+.tox/
+.cache
+htmlcov/
+
+# Documentation Build
+_build/
+docs/_build/
+
+# Large Model Files (if any)
+*.h5
+*.hdf5
+*.pkl
+*.pickle
+
+# Configuration Files (may contain sensitive info)
+config.yaml
+config.json
+secrets.json
+
+# Backup Files
+*.bak
+*.backup
+*.old
+
+# =============================================================================
+# DEVELOPMENT NOTES
+# =============================================================================
+# This .gitignore ensures only essential production files are committed:
+# 
+# ✅ INCLUDED (9 essential files):
+# 1. model.py (FIXED - core architecture)
+# 2. enhanced_dataset.py (NEW - full augmentation)  
+# 3. train.py (UPDATED - production training)
+# 4. evaluate.py (UPDATED - evaluation)
+# 5. inference.py (STABLE - inference)
+# 6. test_enhanced_training.py (NEW - quick test)
+# 7. README.md (UPDATED - documentation)
+# 8. requirements.txt (UPDATED - dependencies)
+# 9. TECHNICAL_ANALYSIS.md (UPDATED - technical docs)
+# 
+# ❌ EXCLUDED:
+# - All deprecated/legacy files
+# - Training outputs & models
+# - Dataset (should be downloaded separately)
+# - Debug/testing scripts
+# - IDE configurations
+# - Temporary files
+#
+# Repository size: ~50KB (clean, focused)
+# Clone time: <1 second
+# Purpose: Production-ready PCB defect detection system
