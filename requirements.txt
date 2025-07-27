@@ -1,6 +1,6 @@
-# Core Deep Learning
-torch>=1.9.0
-torchvision>=0.10.0
+# Core Deep Learning - RTX 3090 Compatible
+torch>=2.0.0
+torchvision>=0.15.0
 
 # Data Processing
 numpy>=1.21.0
@@ -15,9 +15,13 @@ scikit-learn>=1.0.0
 # Training & Utils
 tqdm>=4.62.0
 pyyaml>=5.4.0
+psutil>=5.8.0
 
 # Optional (for advanced monitoring)
 tensorboard>=2.7.0
+
+# Performance optimization
+setuptools>=65.0.0
 
 # NOTE: albumentations REMOVED - using torchvision transforms instead
 # albumentations>=1.1.0  # No longer required
