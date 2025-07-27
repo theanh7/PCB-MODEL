@@ -176,7 +176,7 @@ class PCBAugmentedDataset(Dataset):
         return image, targets, img_name
 
 
-def create_enhanced_dataloaders(data_dir, batch_size=8, num_workers=4, img_size=600):
+def create_enhanced_dataloaders(data_dir, batch_size=32, num_workers=12, img_size=600, pin_memory=True):
     """Create enhanced data loaders with full augmentation"""
     
     # Training dataset with augmentation
@@ -203,14 +203,16 @@ def create_enhanced_dataloaders(data_dir, batch_size=8, num_workers=4, img_size=
         is_train=False  # No augmentation
     )
     
-    # Create data loaders
+    # Create data loaders - Optimized for RTX A4000/3090
     train_loader = DataLoader(
         train_dataset,
         batch_size=batch_size,
         shuffle=True,
         num_workers=num_workers,
         drop_last=True,
-        pin_memory=True
+        pin_memory=pin_memory,
+        persistent_workers=True if num_workers > 0 else False,
+        prefetch_factor=2 if num_workers > 0 else None
     )
     
     val_loader = DataLoader(
@@ -219,7 +221,9 @@ def create_enhanced_dataloaders(data_dir, batch_size=8, num_workers=4, img_size=
         shuffle=False,
         num_workers=num_workers,
         drop_last=False,
-        pin_memory=True
+        pin_memory=pin_memory,
+        persistent_workers=True if num_workers > 0 else False,
+        prefetch_factor=2 if num_workers > 0 else None
     )
     
     test_loader = DataLoader(
@@ -228,7 +232,9 @@ def create_enhanced_dataloaders(data_dir, batch_size=8, num_workers=4, img_size=
         shuffle=False,
         num_workers=num_workers,
         drop_last=False,
-        pin_memory=True
+        pin_memory=pin_memory,
+        persistent_workers=True if num_workers > 0 else False,
+        prefetch_factor=2 if num_workers > 0 else None
     )
     
     return train_loader, val_loader, test_loader

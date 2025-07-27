@@ -410,8 +410,8 @@ def main():
     config = {
         'data_dir': 'pcb-defect-dataset',
         'model_path': 'outputs/best_model.pth',
-        'batch_size': 8,
-        'num_workers': 4,
+        'batch_size': 32,
+        'num_workers': 12,
         'img_size': 600,
         'num_classes': 6,
         'conf_threshold': 0.5,
@@ -434,7 +434,8 @@ def main():
         config['data_dir'],
         batch_size=config['batch_size'],
         num_workers=config['num_workers'],
-        img_size=config['img_size']
+        img_size=config['img_size'],
+        pin_memory=True
     )
     
     # Create evaluator

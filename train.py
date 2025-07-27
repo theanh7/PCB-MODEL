@@ -64,6 +64,10 @@ class PCBTrainer:
         else:
             self.scheduler = None
         
+        # Mixed precision training setup
+        self.mixed_precision = config.get('mixed_precision', False)
+        self.scaler = torch.cuda.amp.GradScaler() if self.mixed_precision else None
+        
         # Training history
         self.train_losses = []
         self.val_losses = []
@@ -100,23 +104,37 @@ class PCBTrainer:
         
         pbar = tqdm(dataloader, desc='Training')
         for batch_idx, (images, targets, _) in enumerate(pbar):
-            images = images.to(self.device)
-            targets = targets.to(self.device)
+            images = images.to(self.device, non_blocking=True)
+            targets = targets.to(self.device, non_blocking=True)
             
-            # Forward pass
+            # Forward pass with mixed precision
             self.optimizer.zero_grad()
-            predictions = self.model(images)
             
-            # Calculate loss
-            loss, loss_dict = self.criterion(predictions, targets)
+            if self.mixed_precision:
+                with torch.cuda.amp.autocast():
+                    predictions = self.model(images)
+                    loss, loss_dict = self.criterion(predictions, targets)
+            else:
+                predictions = self.model(images)
+                loss, loss_dict = self.criterion(predictions, targets)
             
-            # Backward pass
-            loss.backward()
+            # Backward pass with mixed precision
+            if self.mixed_precision:
+                self.scaler.scale(loss).backward()
+            else:
+                loss.backward()
             
             # Gradient clipping for stability
+            if self.mixed_precision:
+                self.scaler.unscale_(self.optimizer)
             torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
             
-            self.optimizer.step()
+            # Optimizer step with mixed precision
+            if self.mixed_precision:
+                self.scaler.step(self.optimizer)
+                self.scaler.update()
+            else:
+                self.optimizer.step()
             
             # Update metrics
             total_loss += loss.item()
@@ -153,14 +171,18 @@ class PCBTrainer:
         with torch.no_grad():
             pbar = tqdm(dataloader, desc='Validation')
             for images, targets, _ in pbar:
-                images = images.to(self.device)
-                targets = targets.to(self.device)
+                images = images.to(self.device, non_blocking=True)
+                targets = targets.to(self.device, non_blocking=True)
                 
-                # Forward pass
-                predictions = self.model(images)
+                # Forward pass with mixed precision
+                if self.mixed_precision:
+                    with torch.cuda.amp.autocast():
+                        predictions = self.model(images)
+                        loss, loss_dict = self.criterion(predictions, targets)
+                else:
+                    predictions = self.model(images)
+                    loss, loss_dict = self.criterion(predictions, targets)
                 
-                # Calculate loss
-                loss, loss_dict = self.criterion(predictions, targets)
                 
                 # Update metrics
                 total_loss += loss.item()
@@ -315,12 +337,12 @@ class PCBTrainer:
 
 def main():
     """Main training function"""
-    # Training configuration
+    # Training configuration - Optimized for RTX A4000/3090
     config = {
         # Data parameters
         'data_dir': 'pcb-defect-dataset',
-        'batch_size': 8,
-        'num_workers': 4,
+        'batch_size': 32,        # Optimized for RTX A4000/3090 (16-24GB VRAM)
+        'num_workers': 12,       # Tận dụng CPU multi-core (8-16 cores)
         'img_size': 600,
         
         # Model parameters
@@ -331,11 +353,13 @@ def main():
         'lambda_coord': 5.0,
         'lambda_noobj': 0.5,
         
-        # Training parameters
+        # Training parameters - Optimized for high-end GPUs
         'epochs': 100,
         'learning_rate': 1e-3,
         'weight_decay': 1e-4,
         'scheduler': 'reduce_on_plateau',  # 'reduce_on_plateau', 'cosine', or None
+        'mixed_precision': True,           # Enable mixed precision for RTX A4000/3090
+        'pin_memory': True,                # Faster data transfer to GPU
         
         # Saving parameters
         'output_dir': 'outputs',
@@ -348,7 +372,8 @@ def main():
         config['data_dir'],
         batch_size=config['batch_size'],
         num_workers=config['num_workers'],
-        img_size=config['img_size']
+        img_size=config['img_size'],
+        pin_memory=config['pin_memory']
     )
     
     print(f"Train batches: {len(train_loader)}")
